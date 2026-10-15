@@ -1,0 +1,39 @@
+blueprint:
+  id: wax-atomic-collection-config-visualizer
+  name: Atomic Collection Config Visualizer
+  tier: 2
+  category: atomic-ecosystem
+  status: refined
+  version: "0.5.0"
+  last_refined: "2026-10-15"
+
+metadata:
+  description: |
+    Educational inspector for AtomicAssets collection-level configuration
+    on WAX — market fee, notify accounts, author context, and checklist insights.
+  related_blueprints:
+    - wax-atomic-template-and-schema-explorer
+    - wax-blends-creator-and-visualizer
+
+invariants:
+  - Market fee shown with human-readable interpretation when possible
+  - Notify accounts listed explicitly including empty state
+  - Recommendations cite triggering field
+  - UI does not imply unauthenticated write access
+
+features:
+  implemented:
+    - configInsights pure helpers
+    - CollectionConfigSummary
+    - ImpactPanel
+    - ConfigChecklist
+    - demo
+
+machine_instructions:
+  - Use pure helpers in examples/configInsights.ts
+  - Do not invent collection fields Atomic does not use
+  - Keep inspection separate from privileged config updates
+
+technical_requirements:
+  framework: Next.js 15 + TypeScript (strict)
+  styling: Tailwind CSS
