@@ -1,5 +1,7 @@
 # wax-atomic-collection-config-visualizer
 
+> **v2:** native NFT backing is gone. Author lists cap at 24. Market fee is read live at sale time. See [V2-NOTES.md](./V2-NOTES.md) and the catalog [ATOMICASSETS-V2.md](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog/blob/main/ATOMICASSETS-V2.md).
+
 > **Status:** 🔄 Hardened for public review (PX Perfection Standard v1.1)
 > **Category:** Atomic Ecosystem – Collection Configuration
 > **Parent Catalog:** [wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
