@@ -67,3 +67,42 @@ export function previewSettlement(listedPrice: number, fee: number): Settlement 
     sellerReceives: listedPrice - collectionCut,
   };
 }
+
+/**
+ * createcol name and notify rules. is_account and has_auth are not simulated.
+ * A dotted name or a name that is already an account is marked as needing that
+ * authorization. This function does not grant it.
+ * Length is JavaScript string length.
+ */
+export type CollectionShape =
+  | { ok: false; reason: string }
+  | { ok: true; action: "createcol"; auth: "none" | "existing-account" | "suffix" };
+
+export function previewCreateCollection(input: {
+  name: string;
+  alreadyExists: boolean;
+  nameIsExistingAccount: boolean;
+  allowNotify: boolean;
+  notifyAccounts: readonly string[];
+  authorizedAccounts: readonly string[];
+}): CollectionShape {
+  let auth: "none" | "existing-account" | "suffix" = "none";
+  if (input.nameIsExistingAccount) {
+    auth = "existing-account";
+  } else if (input.name.includes(".")) {
+    auth = "suffix";
+  } else if (input.name.length !== 12) {
+    return { ok: false, reason: "Without special authorization, collection names must be 12 characters long" };
+  }
+  if (input.alreadyExists) return { ok: false, reason: "A collection with this name already exists" };
+  if (!input.allowNotify && input.notifyAccounts.length > 0) {
+    return { ok: false, reason: "Can't add notify_accounts if allow_notify is false" };
+  }
+  const seen = new Set<string>();
+  for (const account of input.authorizedAccounts) {
+    if (seen.has(account)) return { ok: false, reason: "You can't have duplicates in the authorized_accounts" };
+    seen.add(account);
+  }
+  return { ok: true, action: "createcol", auth };
+}
+

@@ -23,7 +23,13 @@ Predict, then run:
 npm test
 ```
 
----
+## Who this is for
+
+- **Creators.** A collection name with no dot and no matching account must be 12 characters (`pixeljourney`). A short name fails with `Without special authorization, collection names must be 12 characters long`. A dotted name (`art.px`) needs the suffix account's authorization. A name that is already an account needs that account's authorization. This preview marks those two cases (`auth: "suffix"` or `"existing-account"`). It does not grant the auth.
+- **Artists.** The market fee is your cut, capped at 15%. Changing it does not change the price a buyer already sees. It changes what you and the seller each receive at settlement.
+- **Developers.** `allow_notify: false` plus any notify account fails (`Can't add notify_accounts if allow_notify is false`). A repeated authorized account fails. `is_account` is not checked, so a well-shaped name can still fail on chain.
+
+`previewCreateCollection` is that shape check. Schemas and mint refusals are [wax-atomic-template-and-schema-explorer](https://github.com/pixel-journey/wax-atomic-template-and-schema-explorer). The official create walkthrough is [Managing AA Collections](https://docs.wax.io/build/tutorials/howto_atomicassets/collection_js).
 
 ## Beginner — the four knobs
 
