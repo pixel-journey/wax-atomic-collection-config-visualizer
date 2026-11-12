@@ -1,12 +1,17 @@
 # wax-atomic-collection-config-visualizer
 
-> **v2:** native NFT backing is gone. Author lists cap at 24. Market fee is read live at sale time. See [V2-NOTES.md](./V2-NOTES.md) and the catalog [ATOMICASSETS-V2.md](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog/blob/main/ATOMICASSETS-V2.md).
+> **Home for collection fee, auth lists, and notify lists.** Lists longer than 24 are refused. Market fee is 0 to 0.15. AtomicMarket reads the fee live at settlement: the buyer pays the listed price, the split moves. The course is [EDUCATION.md](./EDUCATION.md). Related rules live in [wax-atomic-template-and-schema-explorer](https://github.com/pixel-journey/wax-atomic-template-and-schema-explorer) (schemas, templates) and [wax-atomicassets-v2-action-previews](https://github.com/pixel-journey/wax-atomicassets-v2-action-previews) (author, RAM, offers). Do not open a new micro-repo for a single check that belongs here.
+
+**Official sources, still live:**
+- [Managing AA Collections](https://docs.wax.io/build/tutorials/howto_atomicassets/collection_js)
+- [How-To AtomicAssets](https://docs.wax.io/build/tutorials/howto_atomicassets)
+- [atomicassets-contract v2.0.0](https://github.com/atomicassets/atomicassets-contract/releases/tag/v2.0.0)
 
 > **Status:** 🔄 Hardened for public review (PX Perfection Standard v1.1)
 > **Category:** Atomic Ecosystem – Collection Configuration
 > **Parent Catalog:** [wax-ecosystem-blueprint-catalog](https://github.com/pixel-journey/wax-ecosystem-blueprint-catalog)
 > **Related Perfected Foundations:** [pixel-journey-standards](https://github.com/pixel-journey/pixel-journey-standards) · [pixel-journey-templates](https://github.com/pixel-journey/pixel-journey-templates) · [gitbook-docs](https://github.com/pixel-journey/gitbook-docs)
-> **Trust label:** `educational-reference` — see [VERIFICATION-LOG.md](./VERIFICATION-LOG.md).
+> **Trust label:** `educational-reference` — the pure functions in `src/collectionRules.ts` are tested (`npm test`). The React visualizer is not. See [VERIFICATION-LOG.md](./VERIFICATION-LOG.md).
 
 **Goal:** Deliver a premium, educational reference for understanding, inspecting, and reasoning about AtomicAssets **collection-level** configuration on WAX — market fee, notify accounts, author/authorized accounts, and how those settings affect players and marketplaces. Collection config is small in surface area and large in consequence.
 
