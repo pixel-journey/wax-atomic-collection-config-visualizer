@@ -1,9 +1,9 @@
 /**
  * setroyalconf and setattrroy from atomicmarket v2.0.0.
- * is_account is not checked. The hash is eosio::pack of
- * (uint8 source, string field, variant index 10, string value) then sha256.
- * Index 10 is std::string in atomicdata::ATOMIC_ATTRIBUTE. Other types are
- * not packed. Not checked against a node.
+ * is_account is not checked. A key is eosio::pack of
+ * (uint8 source, string field, variant index, value) then sha256.
+ * String is index 10. int8 through uint64 are indexes 0 through 7,
+ * little-endian. Not checked against a node.
  */
 import { createHash } from "node:crypto";
 
@@ -27,6 +27,32 @@ function packString(value: string): number[] {
 
 export function hashStringAttribute(source: number, field: string, value: string): string {
   const packed = Buffer.from([source, ...packString(field), 10, ...packString(value)]);
+  return createHash("sha256").update(packed).digest("hex");
+}
+
+const INT_KEY = {
+  int8: [0, 1],
+  int16: [1, 2],
+  int32: [2, 4],
+  int64: [3, 8],
+  uint8: [4, 1],
+  uint16: [5, 2],
+  uint32: [6, 4],
+  uint64: [7, 8],
+} as const;
+
+export type IntKind = keyof typeof INT_KEY;
+
+export function hashIntegerAttribute(source: number, field: string, kind: IntKind, value: bigint): string {
+  const [index, width] = INT_KEY[kind];
+  const bits = BigInt(width * 8);
+  const masked = value & ((1n << bits) - 1n);
+  const body = Buffer.alloc(width);
+  if (width === 1) body.writeUInt8(Number(masked));
+  else if (width === 2) body.writeUInt16LE(Number(masked));
+  else if (width === 4) body.writeUInt32LE(Number(masked));
+  else body.writeBigUInt64LE(masked);
+  const packed = Buffer.from([source, ...packString(field), index, ...body]);
   return createHash("sha256").update(packed).digest("hex");
 }
 
