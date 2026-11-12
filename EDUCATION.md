@@ -68,7 +68,9 @@ The WAX docs walk the create path in [Managing AA Collections](https://docs.wax.
 
 ### The live fee
 
-AtomicMarket v2 reads `market_fee` at settlement, not at listing time. The buyer still pays the listed price. The split between seller and collection moves. `previewSettlement(100, 0.05)` is 5 to the collection and 95 to the seller. `previewSettlement(100, 0.1)` is 10 and 90. The listed price is still 100.
+AtomicMarket v2 reads `market_fee` at settlement, not at listing time. The buyer still pays the listed price. The split between seller and collection moves. `previewSettlement(100, 0.05)` is 5 to the collection and 95 to the seller. `previewSettlement(100, 0.1)` is 10 and 90. The listed price is still 100. That sketch ignores the maker fee, the taker fee, and bonus fees.
+
+`previewPayout` is `internal_payout_sale` from [atomicmarket v2.0.0](https://github.com/atomicassets/atomicmarket-contract/tree/v2.0.0). Each cut is `Math.trunc(fee * amount)`, the C++ cast to `uint64_t`. Maker, then taker, then the live collection fee, then a bonus fee whose counter matches and whose id is in `[start, end)`. The id at `end` is excluded. A 1% fee on 3 units truncates to 0. The seller remainder must be greater than 0, or the string is `Total fees leave no payout for the seller`. A royalty config changes who receives the collection cut, not the seller's remainder. The recipient walk is not done. Auction claims that name this payout live in [wax-atomic-markets-and-trading-interface](https://github.com/pixel-journey/wax-atomic-markets-and-trading-interface).
 
 | Attack | Naive code | This lab | Test |
 | --- | --- | --- | --- |

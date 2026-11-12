@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { previewAuthorizedList, previewNotifyList, previewMarketFee, previewSettlement } from "./collectionRules";
+import { previewAuthorizedList, previewNotifyList, previewMarketFee, previewSettlement, previewPayout } from "./collectionRules";
 
 describe("collection config rules", () => {
   it("refuses an authorized list longer than 24", () => {
@@ -33,5 +33,36 @@ describe("collection config rules", () => {
     const after = previewSettlement(100, 0.1);
     expect(before).toEqual({ listedPrice: 100, fee: 0.05, collectionCut: 5, sellerReceives: 95 });
     expect(after).toEqual({ listedPrice: 100, fee: 0.1, collectionCut: 10, sellerReceives: 90 });
+  });
+
+  it("truncates each market cut and refuses a seller remainder of zero", () => {
+    expect(previewPayout({
+      amount: 10000,
+      makerFee: 0.01,
+      takerFee: 0.01,
+      collectionFee: 0.05,
+      assetCount: 1,
+      hasRoyaltyConfig: false,
+      counter: "auction",
+      counterId: 7,
+      bonusFees: [{ fee: 0.01, counter: "auction", startId: 1, endId: 10 }],
+    })).toEqual({
+      ok: true,
+      makerCut: 100,
+      takerCut: 100,
+      collectionCut: 500,
+      bonusCuts: [100],
+      sellerReceives: 9200,
+      collectionRecipient: "author",
+    });
+    expect(previewPayout({
+      amount: 3, makerFee: 0.01, takerFee: 0, collectionFee: 0, assetCount: 1,
+      hasRoyaltyConfig: true, counter: "sale", counterId: 1, bonusFees: [],
+    })).toMatchObject({ makerCut: 0, sellerReceives: 3, collectionRecipient: "royalty-table" });
+    const drained = previewPayout({
+      amount: 100, makerFee: 0.6, takerFee: 0.3, collectionFee: 0.15, assetCount: 1,
+      hasRoyaltyConfig: false, counter: "sale", counterId: 1, bonusFees: [],
+    });
+    expect(drained).toEqual({ ok: false, reason: "Total fees leave no payout for the seller" });
   });
 });

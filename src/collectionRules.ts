@@ -106,3 +106,60 @@ export function previewCreateCollection(input: {
   return { ok: true, action: "createcol", auth };
 }
 
+/**
+ * internal_payout_sale from atomicassets/atomicmarket-contract tag v2.0.0.
+ * Cuts are (uint64_t)(fee * amount), which truncates. Maker, then taker,
+ * then the live collection fee, then bonus fees whose counter matches and
+ * whose id is in [start, end). The seller remainder must be greater than 0.
+ * A royalty config changes who receives the collection cut. It does not
+ * change the seller remainder. That recipient walk is not done here.
+ * Marketplace rows are assumed to exist. No balance is written.
+ */
+export type BonusFee = { fee: number; counter: string; startId: number; endId: number };
+
+export type Payout =
+  | { ok: false; reason: string }
+  | {
+      ok: true;
+      makerCut: number;
+      takerCut: number;
+      collectionCut: number;
+      bonusCuts: number[];
+      sellerReceives: number;
+      collectionRecipient: "author" | "royalty-table";
+    };
+
+export function previewPayout(input: {
+  amount: number;
+  makerFee: number;
+  takerFee: number;
+  collectionFee: number;
+  assetCount: number;
+  hasRoyaltyConfig: boolean;
+  counter: string;
+  counterId: number;
+  bonusFees: readonly BonusFee[];
+}): Payout {
+  if (!(input.collectionFee >= 0 && input.collectionFee <= 0.15)) {
+    return { ok: false, reason: "The collection fee at execution time is outside the valid range" };
+  }
+  const cut = (fee: number) => Math.trunc(fee * input.amount);
+  const makerCut = cut(input.makerFee);
+  const takerCut = cut(input.takerFee);
+  const collectionCut = cut(input.collectionFee);
+  const bonusCuts: number[] = [];
+  let spent = makerCut + takerCut + collectionCut;
+  for (const bonus of input.bonusFees) {
+    if (bonus.counter !== input.counter) continue;
+    if (input.counterId < bonus.startId || input.counterId >= bonus.endId) continue;
+    const bonusCut = cut(bonus.fee);
+    bonusCuts.push(bonusCut);
+    spent += bonusCut;
+  }
+  const sellerReceives = input.amount - spent;
+  if (sellerReceives <= 0) return { ok: false, reason: "Total fees leave no payout for the seller" };
+  const collectionRecipient = input.assetCount > 1 || !input.hasRoyaltyConfig ? "author" : "royalty-table";
+  return { ok: true, makerCut, takerCut, collectionCut, bonusCuts, sellerReceives, collectionRecipient };
+}
+
+
